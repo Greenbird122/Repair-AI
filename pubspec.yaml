@@ -92,13 +92,14 @@ flutter:
 #  see https://flutter.dev/to/font-from-package
 
 flutter_native_splash:
-  # Light lavender radial-ish backdrop that matches the web splash gradient
-  color: "#f3ecfb"
+  # Dark stage matching the official black-background logo; the Flutter
+  # splash continues from here seamlessly (0D0D0D -> splashBgCenter bloom).
+  color: "#0d0d0d"
   image: assets/branding/emblem.png
   android_12:
     image: assets/branding/icon_foreground.png
-    color: "#f3ecfb"
-    icon_background_color: "#f3ecfb"
+    color: "#0d0d0d"
+    icon_background_color: "#0d0d0d"
   android: true
   ios: false
   web: false

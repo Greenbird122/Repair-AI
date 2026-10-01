@@ -16,14 +16,7 @@ class RepairAiApp extends StatelessWidget {
     return MaterialApp(
       title: 'RepairAI',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        useMaterial3: true,
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: RepairColors.purple,
-          surface: RepairColors.bgCenter,
-        ),
-        scaffoldBackgroundColor: RepairColors.bgCenter,
-      ),
+      theme: RepairTheme.light,
       home: const SplashGate(),
     );
   }

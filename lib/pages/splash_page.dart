@@ -6,13 +6,16 @@ import 'package:flutter/material.dart';
 import '../core/theme.dart';
 import '../widgets/ecg_pulse.dart';
 
-/// Splash screen recreating the RepairAI web intro, beat for beat:
+/// Splash screen recreating the RepairAI intro on its dark logo stage:
 ///
 /// 0.1s  emblem fades/scales in
 /// 2.2s  heartbeat — emblem pumps, ring blooms, ECG spike hits center
 /// 3.5s  ECG sweep finishes crossing the screen
 /// 3.4s  "RepairAI" wordmark rises in
 /// 4.1s  "Heal · Support · Hope" tagline fades in
+///
+/// Dark background matches the official logo; the rest of the app opens in
+/// the light lavender world ([RepairTheme.light]).
 class SplashPage extends StatefulWidget {
   const SplashPage({super.key, required this.onFinished});
 
@@ -42,11 +45,11 @@ class _SplashPageState extends State<SplashPage>
   Timer? _doneTimer;
 
   /// A 0..1 value over the [start, end] window (seconds) of the master clock.
-  Animation<double> _phase(double start, double end, Curve curve) =>
+  Animation<double> _phase(double start, double end, Curve transform) =>
       Tween<double>(begin: 0, end: 1).animate(
         CurvedAnimation(
           parent: _clock,
-          curve: Interval(start / 5, end / 5, curve: curve),
+          curve: Interval(start / 5, end / 5, curve: transform),
         ),
       );
 
@@ -85,8 +88,7 @@ class _SplashPageState extends State<SplashPage>
     final double pulseH = screen.width / 6; // ECG box keeps its 6:1 ratio
 
     // Wordmark / tagline sizes: clamp(38px, 11vw, 60px) and clamp(14px, 3.8vw, 18px).
-    final double wordSize =
-        math.min(math.max(0.11 * screen.width, 38), 60);
+    final double wordSize = math.min(math.max(0.11 * screen.width, 38), 60);
     final double taglineSize =
         math.min(math.max(0.038 * screen.width, 14), 18);
 
@@ -96,7 +98,7 @@ class _SplashPageState extends State<SplashPage>
           gradient: RadialGradient(
             center: Alignment(0, -0.16), // circle at 50% 42%
             radius: 1.2,
-            colors: [RepairColors.bgCenter, RepairColors.bgEdge],
+            colors: [RepairColors.splashBgCenter, RepairColors.splashBg],
           ),
         ),
         child: SafeArea(
@@ -157,18 +159,22 @@ class _SplashPageState extends State<SplashPage>
                             child: child,
                           ),
                         ),
-                        child: Image.asset(
-                          'assets/branding/emblem.png',
-                          width: emblemW,
-                          height: emblemH,
-                          fit: BoxFit.contain,
+                        child: RepaintBoundary(
+                          // Isolates the decoded emblem so the fade/pump
+                          // transforms repaint a cheap layer, not the image.
+                          child: Image.asset(
+                            'assets/branding/emblem.png',
+                            width: emblemW,
+                            height: emblemH,
+                            fit: BoxFit.contain,
+                          ),
                         ),
                       ),
                     ],
                   ),
                 ),
                 SizedBox(height: math.min(0.035 * screen.height, 32)),
-                // --- wordmark: "Repair" purple + "AI" amber ---
+                // --- wordmark: "Repair" white + "AI" amber ---
                 AnimatedBuilder(
                   animation: _word,
                   builder: (context, child) => Opacity(
@@ -184,15 +190,18 @@ class _SplashPageState extends State<SplashPage>
                       children: [
                         TextSpan(
                           text: 'AI',
-                          style: RepairText.wordmark(wordSize)
-                              .copyWith(color: RepairColors.amber),
+                          style: RepairText.wordmark(
+                            wordSize,
+                            color: RepairColors.amber,
+                          ),
                         ),
                       ],
                     ),
-                    style: RepairText.wordmark(wordSize),
+                    style: RepairText.wordmark(wordSize,
+                        color: RepairColors.onDark),
                   ),
                 ),
-                SizedBox(height: 14),
+                const SizedBox(height: 14),
                 // --- tagline ---
                 AnimatedBuilder(
                   animation: _tagline,
@@ -200,7 +209,8 @@ class _SplashPageState extends State<SplashPage>
                       Opacity(opacity: _tagline.value, child: child),
                   child: Text(
                     'Heal · Support · Hope',
-                    style: RepairText.tagline(taglineSize),
+                    style: RepairText.tagline(taglineSize,
+                        color: RepairColors.onDarkMuted),
                   ),
                 ),
               ],
