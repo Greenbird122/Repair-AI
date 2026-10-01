@@ -4,11 +4,9 @@ import 'package:flutter/material.dart';
 abstract final class RepairColors {
   // Light "app world" — calm lavender used across in-app pages.
   static const Color bgCenter = Color(0xFFFDFBFF);
-  static const Color bgEdge = Color(0xFFF0E7FA);
   static const Color purple = Color(0xFF4A2068);
   static const Color amber = Color(0xFFF5A012);
   static const Color muted = Color(0xFF7B5A9A);
-  static const Color black = Color(0xFF0D0D0D);
 
   // Dark splash stage — matches the official black-background logo.
   static const Color splashBgCenter = Color(0xFF161119);
