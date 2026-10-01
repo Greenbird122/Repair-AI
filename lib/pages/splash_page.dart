@@ -167,6 +167,7 @@ class _SplashPageState extends State<SplashPage>
                             width: emblemW,
                             height: emblemH,
                             fit: BoxFit.contain,
+                            filterQuality: FilterQuality.medium,
                           ),
                         ),
                       ),

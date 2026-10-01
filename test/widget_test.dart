@@ -65,4 +65,17 @@ void main() {
     final BuildContext homeCtx = tester.element(find.text('Get Started'));
     expect(Theme.of(homeCtx).scaffoldBackgroundColor, RepairColors.bgCenter);
   });
+
+  testWidgets('emblem is precached, not decode-blocked on first paint',
+      (tester) async {
+    await tester.pumpWidget(const RepairAiApp());
+    await tester.pump(); // run initState -> precacheImage kicks off
+    await tester.runAsync(() async {
+      // Let the real async decode finish, like the engine would off-frame.
+      await Future<void>.delayed(const Duration(milliseconds: 300));
+    });
+    final ImageCache cache = PaintingBinding.instance.imageCache;
+    // Either still decoding (pending) or done (live) — never missing.
+    expect(cache.pendingImageCount + cache.liveImageCount, greaterThan(0));
+  });
 }

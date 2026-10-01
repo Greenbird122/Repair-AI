@@ -32,6 +32,22 @@ class SplashGate extends StatefulWidget {
 
 class _SplashGateState extends State<SplashGate> {
   bool _showSplash = true;
+  bool _precacheDone = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Decode the emblem now so its first appearance on the splash never
+    // janks the 0.1s fade-in (decode happens off the animation clock).
+    // didChangeDependencies is the safe place — context is fully usable.
+    if (!_precacheDone) {
+      _precacheDone = true;
+      precacheImage(
+        const AssetImage('assets/branding/emblem.png'),
+        context,
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
