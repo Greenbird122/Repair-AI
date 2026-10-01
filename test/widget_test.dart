@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:repairai/core/theme.dart';
 import 'package:repairai/main.dart';
+import 'package:repairai/pages/splash_gate.dart';
 import 'package:repairai/pages/splash_page.dart';
 
 void main() {
