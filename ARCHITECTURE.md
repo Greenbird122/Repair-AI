@@ -38,6 +38,9 @@ paths are maintained.
    pump the page, assert the key widget exists.
 7. **Deps stay lean** — current: go_router only. Every new dep needs a
    reason; heavy UI libs are avoided to keep the APK light.
+8. **CI gates every push** — `.github/workflows/ci.yml` runs
+   `flutter analyze` + `flutter test` on `main` (and PRs). Don't push
+   red: both must pass locally first.
 
 ## Splash timeline (reference)
 
