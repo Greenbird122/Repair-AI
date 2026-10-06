@@ -77,3 +77,8 @@ error reporting must be reviewed, not just installed.
    behavior, cost per user.
 5. **The 30–40 page list** — needs to be written down and cut to a core
    loop before mass page production starts.
+6. **TLS cert pinning** — deliberately deferred to **Phase 1**, when real
+   credentials start crossing the wire. `package:http` has no built-in
+   pinning, so it needs a custom client over a pinned `SecurityContext`.
+   Logged as a choice, not an oversight: `epl_app` shipped with pinning
+   disabled and its 90-day cert boundary lined up with its death window.
