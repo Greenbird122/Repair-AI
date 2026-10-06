@@ -72,11 +72,12 @@ this table is the written reason §1.5 asks for.
 3. **Tokens live in memory only.** Secure on-device persistence is deferred
    to the auth slice, deliberately: writing a JWT to disk before a login flow
    exists would be a pointless security hole. `TokenStorage` is the seam.
-4. **Token clearing rule** — clear both tokens when the server rejects the
-   refresh (4xx) or returns a success payload we cannot use (not an object,
-   no access token, not JSON). Keep them on network failure, so a dropped
-   connection never logs a user out; the next attempt surfaces 4xx if the
-   token is genuinely dead.
+4. **Token clearing rule** — clear both tokens **only when the server
+   definitively rejects the refresh (4xx)**. Every other failure keeps
+   them: timeout, socket error, or a garbled/unexpected 200 payload
+   (captive portal, CDN error page) is network flakiness, not a dead
+   token, and must never log a user out. If the token really is dead,
+   the next attempt comes back 4xx and clears then.
 5. **`Result.loading` was cut.** It had no producer in the data layer:
    pending state is already carried by Riverpod's `AsyncValue`, so the
    variant was dead weight. `Result` is `Data` / `Error` / `Offline`.
