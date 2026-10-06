@@ -50,22 +50,18 @@ final class JwtAuthenticator implements Authenticator {
           )
           .timeout(timeout);
 
-      if (response.statusCode >= 400) {
+      if (response.statusCode >= 400 && response.statusCode < 500) {
+        // Only a definitive 4xx rejection clears tokens. 5xx and malformed
+        // 200s are transient and must not log the user out.
         await storage.clear();
         return false;
       }
 
       final decoded = jsonDecode(response.body);
-      if (decoded is! Map<String, dynamic>) {
-        await storage.clear();
-        return false;
-      }
+      if (decoded is! Map<String, dynamic>) return false;
 
       final access = decoded['access'];
-      if (access is! String || access.isEmpty) {
-        await storage.clear();
-        return false;
-      }
+      if (access is! String || access.isEmpty) return false;
 
       final rotated = decoded['refresh'];
       await storage.save(
@@ -82,7 +78,6 @@ final class JwtAuthenticator implements Authenticator {
     } on http.ClientException {
       return false;
     } on FormatException {
-      await storage.clear();
       return false;
     }
   }
