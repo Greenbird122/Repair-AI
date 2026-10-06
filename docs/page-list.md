@@ -2,7 +2,7 @@
 
 > **Status: written 2026-10-06.** Answers open decision 5 in `corpus.md`.
 > This is the target, not a progress report — pages 1–2 are the only ones
-> that exist (`corpus.md`: 1 of 30–40 built).
+> that exist (`corpus.md`: 2 of 36 built).
 
 ## The core loop
 
