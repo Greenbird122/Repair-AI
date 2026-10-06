@@ -1,8 +1,8 @@
 # RepairAI — Phase 0: Network Core
 
 > **Status: complete.** `flutter analyze` 0 issues · `flutter test` 52 passing
-> (45 new, 7 pre-existing). No page, route or widget changed — this phase is
-> plumbing only.
+> + 1 live smoke test (skipped locally, green against production). No page,
+> route or widget changed — this phase is plumbing only.
 >
 > This file is the explanation of record, so source files stay lean. If a
 > file below has no purpose, it should be deleted.
@@ -19,7 +19,7 @@ Feature pages consume this from Phase 1 onward.
 
 | File | Purpose |
 |---|---|
-| `result.dart` | The `Result<T>` contract every call returns: `Loading`, `Data`, `Error`, `Offline`. Forces consumers to handle all four states instead of crashing on null. |
+| `result.dart` | The `Result<T>` contract every call returns: `Data`, `Error`, `Offline`. Forces consumers to handle every outcome instead of crashing on null. |
 | `api_exception.dart` | Typed failure carried inside `Error`. `ApiFailureKind.http` = server rejected it (with status code); `malformed` = payload unusable. Lets pages branch on 401 vs 500 later. |
 | `token_storage.dart` | `TokenStorage` contract plus `InMemoryTokenStorage`. The contract is what lets Phase 1 swap in secure persistence without touching the client. |
 | `auth_authenticator.dart` | `Authenticator` contract plus `JwtAuthenticator`: exchanges a refresh token at `/api/auth/refresh/`. Refresh is **single-flight** — N simultaneous 401s cost exactly one refresh, which matters because refresh tokens rotate. |
@@ -34,12 +34,22 @@ Feature pages consume this from Phase 1 onward.
 | `network_providers.dart` | Riverpod wiring: one token store, one authenticator, one `ApiClient` per container, closed on dispose. Pages watch these instead of constructing networking themselves. |
 | `health_controller.dart` | `healthProvider` — the backend's health as reactive state. Pages watch it and switch over `Result`. |
 
-### `test/features/network/`
+### `test/features/network/` and `test/smoke/`
 
-Nine test files, one per source file, per `AGENT_SPEC` §1.1. The load-bearing
+Nine test files, one per source file, per `AGENT_SPEC` §1.1, plus the live
+smoke test below. The load-bearing
 cases: concurrent refresh dedupe, 401 → refresh → retry with the rotated
 token, timeout → `Offline`, unreachable host → `Offline`, malformed payload →
 `Error`, and every refresh failure branch.
+
+### `.github/workflows/ci.yml` — the CI smoke test
+
+CI now runs `flutter test` with `LIVE_SMOKE=1`, which un-gates
+`test/smoke/live_api_smoke_test.dart`: a real request to production
+`/api/app-version/`. Local runs skip it explicitly — reported as *skipped*,
+not passed — so development stays offline. This is the "CI smoke test"
+Phase 0 calls for in `api-coverage.md`, and the live proof `AGENT_SPEC`
+§1.8 demands before pages ship against a backend.
 
 ## Dependencies added (AGENT_SPEC §1.5)
 
@@ -67,14 +77,12 @@ this table is the written reason §1.5 asks for.
    no access token, not JSON). Keep them on network failure, so a dropped
    connection never logs a user out; the next attempt surfaces 4xx if the
    token is genuinely dead.
-5. **`Result.loading` is never returned by `ApiClient`.** Its purpose is
-   page-local state a screen holds before its first fetch resolves. Noted
-   here because "unused by the data layer" is intentional, not an oversight —
-   flag it if you'd rather cut it.
+5. **`Result.loading` was cut.** It had no producer in the data layer:
+   pending state is already carried by Riverpod's `AsyncValue`, so the
+   variant was dead weight. `Result` is `Data` / `Error` / `Offline`.
 
 ## Known gaps
 
-- **`Loading` has no producer yet** — see decision 5.
 - The refresh contract was proven live (`400` on an empty body) but a real
   token pair has not been exchanged; that lands with Phase 1.
 - Triage and other endpoints are mapped in `api-coverage.md`, not called
@@ -83,13 +91,17 @@ this table is the written reason §1.5 asks for.
 ## How this was verified
 
 ```
-flutter analyze   →  No issues found! (22.0s)
-flutter test      →  All tests passed!  (52)
+flutter analyze   →  No issues found! (17.1s)
+flutter test      →  +52 ~1: All tests passed!   (smoke skipped)
+LIVE_SMOKE=1 smoke →  +1: All tests passed!       (live, 2s)
 ```
 
-Both run detached per `AGENT_SPEC` §2, serialized (never simultaneously).
-One real defect was caught and fixed this way: `const Offline<T>()` is
-illegal in Dart (`const_with_type_parameters`), three times over.
+Run detached per `AGENT_SPEC` §2, serialized (never simultaneously). Two real
+defects were caught and fixed this way:
+
+1. `const Offline<T>()` is illegal in Dart (`const_with_type_parameters`),
+   three times over.
+2. `test(..., timeout:)` takes a `Timeout`, not a `Duration`.
 
 ## Not in this phase
 
