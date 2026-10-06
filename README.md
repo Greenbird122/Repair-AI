@@ -77,13 +77,17 @@ lib/
   widgets/                  shared widgets (EcgPulse)
 
 test/
-  features/network/         network-layer unit tests
+  app/                      whole-app tests (root wiring, splash flow)
+  core/                     mirrors lib/core/
+  features/network/         mirrors lib/features/network/
   smoke/                    live probe of production (CI only)
-  *.dart                    widget, route and theme tests
 ```
 
 Business logic belongs in `features/<feature>/logic/`. Pages render UI
 and emit callbacks; navigation guards live in `routes.dart`.
+
+Tests mirror `lib/` — the test for any file lives at `test/` + its path,
+with `_test` appended. Whole-app tests go in `test/app/`.
 
 ## Testing
 
