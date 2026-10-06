@@ -8,40 +8,22 @@ import 'package:repairai/features/network/logic/network_providers.dart';
 import 'package:repairai/main.dart';
 
 void main() {
-  testWidgets('production root mounts with providers reachable',
+  testWidgets('a bare RepairAiApp pump still reaches the providers',
       (tester) async {
-    await tester.pumpWidget(buildApp());
-    // Clear the splash hand-off timer so the tree settles on home.
+    // Deliberately no ProviderScope here — the app carries its own.
+    await tester.pumpWidget(const RepairAiApp());
+    // Let the splash hand-off timer fire so the tree settles on home.
     await tester.pump(const Duration(seconds: 6));
     await tester.pump();
 
     expect(find.byType(MaterialApp), findsOneWidget);
 
-    final ProviderContainer container = ProviderScope.containerOf(
-      tester.element(find.byType(RepairAiApp)),
-    );
+    // Read from a page-level context, where Phase 1 pages will watch.
+    final BuildContext page = tester.element(find.text('Get Started'));
+    final ProviderContainer container = ProviderScope.containerOf(page);
 
     expect(container.read(apiClientProvider), isA<ApiClient>());
     expect(container.read(tokenStorageProvider), isA<TokenStorage>());
     expect(container.read(authenticatorProvider), isNotNull);
   });
-
-  testWidgets('a provider read inside the tree resolves', (tester) async {
-    await tester.pumpWidget(
-      ProviderScope(
-        child: Builder(
-          builder: (context) => Text(
-            refReadProbe(context).runtimeType.toString(),
-            textDirection: TextDirection.ltr,
-          ),
-        ),
-      ),
-    );
-
-    expect(find.textContaining('ApiClient'), findsOneWidget);
-  });
 }
-
-/// Reads through the ambient scope the way a Phase 1 page will.
-ApiClient refReadProbe(BuildContext context) =>
-    ProviderScope.containerOf(context).read(apiClientProvider);
