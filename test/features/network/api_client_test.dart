@@ -17,13 +17,11 @@ String _status(Object? json) =>
 void main() {
   ApiClient clientWith(
     MockClientHandler handler, {
-    Authenticator? authenticator,
     Duration timeout = const Duration(seconds: 5),
   }) =>
       ApiClient(
         baseUrl: 'https://test',
         httpClient: MockClient(handler),
-        authenticator: authenticator,
         timeout: timeout,
       );
 
@@ -112,14 +110,19 @@ void main() {
   test('sends the stored bearer token', () async {
     final storage = InMemoryTokenStorage();
     await storage.save(accessToken: 'abc', refreshToken: 'r');
-    final auth = JwtAuthenticator(baseUrl: 'https://test', storage: storage);
     String? seen;
-    final client = clientWith(
-      (request) async {
-        seen = request.headers['Authorization'];
-        return http.Response('{"status":"ok"}', 200);
-      },
-      authenticator: auth,
+    final mock = MockClient((request) async {
+      seen = request.headers['Authorization'];
+      return http.Response('{"status":"ok"}', 200);
+    });
+    final client = ApiClient(
+      baseUrl: 'https://test',
+      httpClient: mock,
+      authenticator: JwtAuthenticator(
+        baseUrl: 'https://test',
+        storage: storage,
+        httpClient: mock,
+      ),
     );
 
     await client.get('/x/', decode: _status);
@@ -130,11 +133,10 @@ void main() {
   test('a 401 refreshes once and retries with the new token', () async {
     final storage = InMemoryTokenStorage();
     await storage.save(accessToken: 'stale', refreshToken: 'r1');
-    final auth = JwtAuthenticator(baseUrl: 'https://test', storage: storage);
     final attempts = <http.Request>[];
     var refreshes = 0;
 
-    final client = clientWith((request) async {
+    final mock = MockClient((request) async {
       if (request.url.path == '/api/auth/refresh/') {
         refreshes++;
         return http.Response('{"access":"fresh"}', 200);
@@ -144,7 +146,16 @@ void main() {
         return http.Response('{"detail":"expired"}', 401);
       }
       return http.Response('{"status":"ok"}', 200);
-    }, authenticator: auth);
+    });
+    final client = ApiClient(
+      baseUrl: 'https://test',
+      httpClient: mock,
+      authenticator: JwtAuthenticator(
+        baseUrl: 'https://test',
+        storage: storage,
+        httpClient: mock,
+      ),
+    );
 
     final result = await client.get('/api/thing/', decode: _status);
 
@@ -158,16 +169,24 @@ void main() {
   test('a 401 with a failed refresh surfaces the original error', () async {
     final storage = InMemoryTokenStorage();
     await storage.save(accessToken: 'stale', refreshToken: 'r1');
-    final auth = JwtAuthenticator(baseUrl: 'https://test', storage: storage);
     var refreshes = 0;
 
-    final client = clientWith((request) async {
+    final mock = MockClient((request) async {
       if (request.url.path == '/api/auth/refresh/') {
         refreshes++;
         return http.Response('{"detail":"bad refresh"}', 400);
       }
       return http.Response('{"detail":"expired"}', 401);
-    }, authenticator: auth);
+    });
+    final client = ApiClient(
+      baseUrl: 'https://test',
+      httpClient: mock,
+      authenticator: JwtAuthenticator(
+        baseUrl: 'https://test',
+        storage: storage,
+        httpClient: mock,
+      ),
+    );
 
     final result = await client.get('/api/thing/', decode: _status);
 
