@@ -352,7 +352,7 @@ miscount of 9, which also made the previous total wrong.)
 ## Phased implementation order (proposed — no code yet)
 
 1. **Phase 0 — Network core + health.** Client, JWT store, refresh
-   interceptor, `Result` type (loading/data/error/offline), bounded
+   interceptor, `Result` type (data/error/offline), bounded
    timeouts, `/api/app-version/` health check + CI smoke test.
 2. **Phase 1 — Auth slice (§1).** check-phone → register → login →
    refresh → profile. Fully tested end-to-end.
