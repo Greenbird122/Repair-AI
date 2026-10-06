@@ -206,4 +206,32 @@ void main() {
 
     expect(seen, '{"a":1}');
   });
+
+  test('surfaces a DRF field error as readable text', () async {
+    final client = clientWith(
+      (_) async => http.Response(
+        '{"password":["This field is required."]}',
+        400,
+      ),
+    );
+
+    final result = await client.get('/x/', decode: _status);
+
+    final error = (result as Error<String>).error as ApiException;
+    expect(error.message, 'password: This field is required.');
+  });
+
+  test('joins every field when several fields fail', () async {
+    final client = clientWith(
+      (_) async => http.Response(
+        '{"country":["Required."],"county":["Required."]}',
+        400,
+      ),
+    );
+
+    final result = await client.get('/x/', decode: _status);
+
+    final error = (result as Error<String>).error as ApiException;
+    expect(error.message, 'country: Required. county: Required.');
+  });
 }
