@@ -110,13 +110,29 @@ class ApiClient {
   String? _serverMessage(String body) {
     try {
       final decoded = jsonDecode(body);
-      if (decoded is Map<String, dynamic>) {
-        final detail = decoded['detail'];
-        if (detail is String) return detail;
-      }
-      return null;
+      if (decoded is! Map<String, dynamic>) return null;
+
+      final detail = decoded['detail'];
+      if (detail is String) return detail;
+
+      // DRF field errors: {"password": ["This field is required."]}.
+      final errors = <String>[];
+      decoded.forEach((field, value) {
+        final text = _firstMessage(value);
+        if (text != null) errors.add('$field: $text');
+      });
+      return errors.isEmpty ? null : errors.join(' ');
     } on FormatException {
       return null;
     }
+  }
+
+  String? _firstMessage(Object? value) {
+    if (value is String) return value;
+    if (value is List && value.isNotEmpty) {
+      final first = value.first;
+      if (first is String) return first;
+    }
+    return null;
   }
 }
