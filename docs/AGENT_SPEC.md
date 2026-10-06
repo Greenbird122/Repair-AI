@@ -23,8 +23,12 @@ that is a hard product decision, not a TODO.
 4. **All navigation via the GoRouter table in `lib/core/routes.dart`.**
    No raw `Navigator.push(MaterialPageRoute(...))` in pages. Paths
    kebab-case, names camelCase, navigate by name where possible.
-5. **Deps stay lean.** Current runtime deps: `go_router` only. Every new
-   dep needs a written reason in the commit message. No heavy UI kits.
+5. **Deps stay lean.** Runtime deps: `go_router`, `http`,
+   `flutter_riverpod`, `flutter_secure_storage`. Every new dep needs a
+   written reason — in the commit message, or in the doc it ships with
+   when messages are capped short. No heavy UI kits.
+   **Approved exception (2026-10-06):** a native WebRTC plugin for
+   patient↔CHP calling (Phase 5; `api-coverage.md` decision 4).
 6. **Lint-clean.** `flutter analyze` must report 0 issues. Deprecated API
    (e.g. `withOpacity`) is not shipped; use the modern equivalent
    (`withValues(alpha:)`).
