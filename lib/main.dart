@@ -5,24 +5,24 @@ import 'core/routes.dart';
 import 'core/theme.dart';
 
 void main() {
-  runApp(buildApp());
+  runApp(const RepairAiApp());
 }
 
-/// The exact tree [main] mounts. Kept as a function so tests pump the
-/// production root — ProviderScope included — instead of a hand-rolled
-/// copy that would keep passing if the real one lost its scope.
-Widget buildApp() => const ProviderScope(child: RepairAiApp());
-
+/// App root. [ProviderScope] lives *inside* it, so any bare pump of this
+/// widget — production or test — reaches the providers, and nothing can
+/// silently lose the scope by forgetting to wrap.
 class RepairAiApp extends StatelessWidget {
   const RepairAiApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp.router(
-      title: 'RepairAI',
-      debugShowCheckedModeBanner: false,
-      theme: RepairTheme.light,
-      routerConfig: createRouter(),
+    return ProviderScope(
+      child: MaterialApp.router(
+        title: 'RepairAI',
+        debugShowCheckedModeBanner: false,
+        theme: RepairTheme.light,
+        routerConfig: createRouter(),
+      ),
     );
   }
 }
