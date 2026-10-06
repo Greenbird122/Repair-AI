@@ -8,7 +8,7 @@ import 'token_storage.dart';
 
 /// Supplies the bearer token and exchanges an expired one for a fresh pair.
 abstract interface class Authenticator {
-  String? get accessToken;
+  Future<String?> get accessToken;
 
   /// True once a new pair is stored. Concurrent callers share one in-flight
   /// exchange, so N simultaneous 401s cost exactly one refresh.
@@ -31,14 +31,14 @@ final class JwtAuthenticator implements Authenticator {
   Future<bool>? _inFlight;
 
   @override
-  String? get accessToken => storage.accessToken;
+  Future<String?> get accessToken => storage.accessToken;
 
   @override
   Future<bool> refresh() =>
       _inFlight ??= _exchange().whenComplete(() => _inFlight = null);
 
   Future<bool> _exchange() async {
-    final refreshToken = storage.refreshToken;
+    final refreshToken = await storage.refreshToken;
     if (refreshToken == null || refreshToken.isEmpty) return false;
 
     try {
