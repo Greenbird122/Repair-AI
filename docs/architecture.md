@@ -38,7 +38,7 @@ paths are maintained. Target scale: 36 pages, cut to a 14-page core loop
 - `RepairTheme.light` is the app-wide theme; the splash opts out to its
   own dark stage by design (dark splash → light app).
 - Palette lives in `RepairColors`; type styles in `RepairText`. The
-  palette is pinned by `test/theme_guard_test.dart`.
+  palette is pinned by `test/core/theme_guard_test.dart`.
 
 ## State management
 
@@ -70,10 +70,20 @@ from the `flutter_native_splash` block in `pubspec.yaml`.
 ## Testing
 
 - Convention: every commit ships a test (repo rule).
-- **56 tests across 14 files**: `test/features/network/` (9 files — the
-  network core), `test/smoke/` (live production probe, CI-only), plus
-  `widget_test.dart`, `routes_test.dart`, `theme_guard_test.dart` and
-  `provider_scope_test.dart` at the test root.
+- **Mirroring rule:** every test lives at the path its subject occupies
+  under `lib/`, with `_test` appended — so the test for any file is found
+  by prefixing `test/`. Tests whose subject is the whole app go in
+  `test/app/`; cross-cutting tests (the live smoke probe) go in a named
+  bucket rather than a mirror.
+
+        lib/core/routes.dart     ->  test/core/routes_test.dart
+        lib/core/theme.dart      ->  test/core/theme_guard_test.dart
+        lib/main.dart            ->  test/app/*
+        lib/features/network/... ->  test/features/network/...
+
+- **56 tests across 14 files**: `test/core/` (2), `test/app/` (2),
+  `test/features/network/` (9 — the network core), `test/smoke/` (1,
+  live production probe, CI-only).
 - CI (`.github/workflows/ci.yml`) runs analyze + test on every push/PR
   with `LIVE_SMOKE=1`, so a backend outage fails the build rather than
   reaching users.
