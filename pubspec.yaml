@@ -33,7 +33,9 @@ dependencies:
 
   # Native splash shown while the engine boots, before the animated Flutter splash.
   flutter_native_splash: ^2.4.6
+  flutter_riverpod: ^3.4.3
   go_router: ^18.0.2
+  http: ^1.6.0
 
 dev_dependencies:
   flutter_test:
