@@ -75,8 +75,10 @@ error reporting must be reviewed, not just installed.
 3. **Accounts/auth** — whether and how (shapes onboarding).
 4. **The "AI" in RepairAI** — on-device vs cloud, provider, offline
    behavior, cost per user.
-5. **The 30–40 page list** — needs to be written down and cut to a core
-   loop before mass page production starts.
+5. **The 30–40 page list** — **written: `docs/page-list.md`**
+   (2026-10-06). 36-page inventory cut to a 14-page core loop, phased
+   against `api-coverage.md`, plus the offline requirements it derives
+   for decision 1. New pages must state which loop sentence they serve.
 6. **TLS cert pinning** — deliberately deferred to **Phase 1**, when real
    credentials start crossing the wire. `package:http` has no built-in
    pinning, so it needs a custom client over a pinned `SecurityContext`.
