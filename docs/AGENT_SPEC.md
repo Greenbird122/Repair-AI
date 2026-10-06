@@ -8,7 +8,8 @@
 ## 0. The one-line mission
 
 RepairAI is an **Android-only** maternal-health companion app
-("Heal · Support · Hope") targeting **30–40 pages**. No web, no iOS —
+("Heal · Support · Hope") targeting **36 pages, 14 of them the core
+loop** (`docs/page-list.md`). No web, no iOS —
 that is a hard product decision, not a TODO.
 
 ## 1. Non-negotiables (violating these = a rejected change)
