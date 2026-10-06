@@ -4,6 +4,7 @@
 *.pyc
 *.swp
 .DS_Store
+datafactor_agreement.txt
 .atom/
 .build/
 .buildlog/
