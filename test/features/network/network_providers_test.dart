@@ -30,7 +30,7 @@ void main() {
         .read(tokenStorageProvider)
         .save(accessToken: 'abc', refreshToken: 'r');
 
-    expect(container.read(authenticatorProvider).accessToken, 'abc');
+    expect(await container.read(authenticatorProvider).accessToken, 'abc');
   });
 
   test('authenticator targets the configured base url', () {
