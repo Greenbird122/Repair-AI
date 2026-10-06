@@ -3,10 +3,6 @@ sealed class Result<T> {
   const Result();
 }
 
-final class Loading<T> extends Result<T> {
-  const Loading();
-}
-
 final class Data<T> extends Result<T> {
   const Data(this.value);
 
