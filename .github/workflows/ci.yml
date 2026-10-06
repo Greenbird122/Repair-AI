@@ -27,3 +27,7 @@ jobs:
       - run: flutter pub get
       - run: flutter analyze
       - run: flutter test
+        env:
+          # Phase 0 live smoke: proves production still answers
+          # /api/app-version/ so backend death fails CI, not users.
+          LIVE_SMOKE: "1"
