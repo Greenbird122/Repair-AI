@@ -65,7 +65,7 @@ void main() {
     expect(await storage.refreshToken, 'r1');
   });
 
-  test('clears both tokens when the server rejects the refresh', () async {
+  test('clears both tokens on a definitive 4xx rejection', () async {
     final auth = authWith((_) async => http.Response('{"detail":"bad"}', 400));
 
     expect(await auth.refresh(), isFalse);
@@ -73,18 +73,37 @@ void main() {
     expect(await storage.refreshToken, isNull);
   });
 
-  test('clears both tokens when the payload is not an object', () async {
+  test('keeps tokens when the payload is not an object', () async {
     final auth = authWith((_) async => http.Response('"just a string"', 200));
 
     expect(await auth.refresh(), isFalse);
-    expect(await storage.accessToken, isNull);
+    expect(await storage.accessToken, 'old');
+    expect(await storage.refreshToken, 'r1');
   });
 
-  test('clears both tokens when the payload has no access token', () async {
+  test('keeps tokens when the payload has no access token', () async {
     final auth = authWith((_) async => http.Response('{"access":""}', 200));
 
     expect(await auth.refresh(), isFalse);
-    expect(await storage.accessToken, isNull);
+    expect(await storage.accessToken, 'old');
+  });
+
+  test('keeps tokens on a server error', () async {
+    final auth = authWith(
+      (_) async => http.Response('internal error', 500),
+    );
+
+    expect(await auth.refresh(), isFalse);
+    expect(await storage.accessToken, 'old');
+    expect(await storage.refreshToken, 'r1');
+  });
+
+  test('keeps tokens when the body is not JSON — a garbled 200', () async {
+    final auth = authWith((_) async => http.Response('<html>portal</html>', 200));
+
+    expect(await auth.refresh(), isFalse);
+    expect(await storage.accessToken, 'old');
+    expect(await storage.refreshToken, 'r1');
   });
 
   test('concurrent refreshes share a single network call', () async {
@@ -113,24 +132,20 @@ void main() {
     );
 
     expect(await auth.refresh(), isFalse);
+    expect(await storage.accessToken, 'old');
   });
 
   test('a socket failure reads as refresh failure', () async {
     final auth = authWith((_) async => throw const SocketException('down'));
 
     expect(await auth.refresh(), isFalse);
+    expect(await storage.accessToken, 'old');
   });
 
   test('a client failure reads as refresh failure', () async {
     final auth = authWith((_) async => throw http.ClientException('blocked'));
 
     expect(await auth.refresh(), isFalse);
-  });
-
-  test('an unparseable body reads as refresh failure', () async {
-    final auth = authWith((_) async => http.Response('not json', 200));
-
-    expect(await auth.refresh(), isFalse);
-    expect(await storage.accessToken, isNull);
+    expect(await storage.accessToken, 'old');
   });
 }
