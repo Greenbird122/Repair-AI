@@ -82,6 +82,7 @@ final class JwtAuthenticator implements Authenticator {
     } on http.ClientException {
       return false;
     } on FormatException {
+      await storage.clear();
       return false;
     }
   }
