@@ -68,10 +68,14 @@ class ApiClient {
     }
   }
 
-  Future<http.Response> _attempt(String method, String path, Object? body) {
+  Future<http.Response> _attempt(
+    String method,
+    String path,
+    Object? body,
+  ) async {
     final uri = Uri.parse('$baseUrl$path');
     final headers = <String, String>{'Content-Type': 'application/json'};
-    final token = authenticator?.accessToken;
+    final token = await authenticator?.accessToken;
     if (token != null) headers['Authorization'] = 'Bearer $token';
 
     final Future<http.Response> request = method == 'POST'
