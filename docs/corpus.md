@@ -3,10 +3,12 @@
 > The living inventory. Any agent finishing work MUST add to this file
 > (see `AGENT_SPEC.md` §4.6). If it isn't here, it doesn't exist.
 
-## Status snapshot (2026-10-01)
+## Status snapshot (2026-10-06)
 
 - Pages built: **1 of 30–40** (splash) + placeholder home
-- Tests: 7 passing (3 splash/widget, 2 router, 2 theme guard)
+- Phase 0 network core: **complete** — 9 source + 9 test files,
+  per-file map in `docs/phase-0.md`
+- Tests: **52 passing** (45 network, 7 splash/router/theme)
 - CI: green on every push so far
 - APK: debug builds verified on emulator (avd `repair_phone`)
 
@@ -34,6 +36,14 @@
    `SplashGate` split into its own file to avoid a main↔routes cycle
 7. **CI** (commit `170dff4`) — GitHub Actions: analyze + test per push/PR
 8. **Docs sweep** (this commit) — dead code removed, docs/ established
+9. **API coverage map** (2026-10-06) — `docs/api-coverage.md` catalogues
+   the whole `repairai.co.ke` surface, the five product decisions that
+   were blocking implementation, and the triage surface enumerated live
+10. **Phase 0 network core** (2026-10-06) — `lib/features/network/`:
+    `Result` contract, typed API failures, `TokenStorage`, single-flight
+    JWT refresh, `ApiClient` (5s timeout, 401 retry), app-version health
+    probe, Riverpod wiring. Deps added: `http`, `flutter_riverpod`.
+    Per-file purposes and decisions in `docs/phase-0.md`.
 
 ## Lessons learned (from the failed epl_app predecessor)
 
@@ -60,7 +70,8 @@ error reporting must be reviewed, not just installed.
 
 1. **Data layer** — where does health data live (local DB / cloud /
    hybrid), sync strategy, offline UX. Biggest risk; gates pages 5–15.
-2. **State management** — Riverpod vs Bloc vs plain ChangeNotifier.
+2. **State management** — **decided: Riverpod** (2026-10-06). Providers
+   live in `features/<feature>/logic/`; pages stay dumb.
 3. **Accounts/auth** — whether and how (shapes onboarding).
 4. **The "AI" in RepairAI** — on-device vs cloud, provider, offline
    behavior, cost per user.
