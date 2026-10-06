@@ -3,12 +3,13 @@
 > The living inventory. Any agent finishing work MUST add to this file
 > (see `AGENT_SPEC.md` §4.6). If it isn't here, it doesn't exist.
 
-## Status snapshot (2026-10-06)
+## Status snapshot (2026-10-07)
 
-- Pages built: **1 of 30–40** (splash) + placeholder home
-- Phase 0 network core: **complete** — 9 source + 9 test files,
-  per-file map in `docs/phase-0.md`
-- Tests: **52 passing** (45 network, 7 splash/router/theme)
+- Pages built: **2 of 36** (splash + placeholder home) — plan in
+  `docs/page-list.md`
+- Phase 0 network core: **complete** — 9 source files, file-by-file map
+  in `docs/phase-0.md`
+- Tests: **56 passing** across 14 files (47 network, 8 app, 1 live smoke)
 - CI: green on every push so far
 - APK: debug builds verified on emulator (avd `repair_phone`)
 
