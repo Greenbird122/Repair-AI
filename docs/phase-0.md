@@ -1,6 +1,6 @@
 # RepairAI — Phase 0: Network Core
 
-> **Status: complete.** `flutter analyze` 0 issues · `flutter test` 52 passing
+> **Status: complete.** `flutter analyze` 0 issues · `flutter test` 56 passing
 > + 1 live smoke test (skipped locally, green against production). No page,
 > route or widget changed — this phase is plumbing only.
 >
@@ -93,7 +93,7 @@ this table is the written reason §1.5 asks for.
 
 ```
 flutter analyze   →  No issues found! (17.1s)
-flutter test      →  +52 ~1: All tests passed!   (smoke skipped)
+flutter test      →  +56 ~1: All tests passed!   (smoke skipped)
 LIVE_SMOKE=1 smoke →  +1: All tests passed!       (live, 2s)
 ```
 
