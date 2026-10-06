@@ -1,9 +1,9 @@
-/// Where JWTs live between requests. Secure on-device persistence arrives
-/// with the auth slice; Phase 0 keeps tokens in memory only, so nothing
-/// sensitive is ever written to disk before login actually exists.
+/// Where JWTs live between requests. Reads are async because the secure
+/// backend is — an in-memory cache with startup hydration would silently
+/// drop the session if hydration were ever skipped.
 abstract interface class TokenStorage {
-  String? get accessToken;
-  String? get refreshToken;
+  Future<String?> get accessToken;
+  Future<String?> get refreshToken;
 
   Future<void> save({
     required String accessToken,
@@ -18,10 +18,10 @@ final class InMemoryTokenStorage implements TokenStorage {
   String? _refreshToken;
 
   @override
-  String? get accessToken => _accessToken;
+  Future<String?> get accessToken async => _accessToken;
 
   @override
-  String? get refreshToken => _refreshToken;
+  Future<String?> get refreshToken async => _refreshToken;
 
   @override
   Future<void> save({
