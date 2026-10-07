@@ -6,6 +6,7 @@ import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 
 import 'package:repairai/features/auth/logic/session_controller.dart';
+import 'package:repairai/features/locations/data/location_api.dart';
 import 'package:repairai/features/network/data/api_client.dart';
 import 'package:repairai/features/network/data/api_exception.dart';
 import 'package:repairai/features/network/data/result.dart';
@@ -122,7 +123,9 @@ void main() {
   }
 
   Future<void> selectAt(WidgetTester tester, int index, String label) async {
-    await tester.tap(find.byType(DropdownButtonFormField).at(index));
+    // The page ships DropdownButtonFormField<Place>; a bare type finder
+    // matches the generic dynamic instantiation and finds nothing.
+    await tester.tap(find.byType(DropdownButtonFormField<Place>).at(index));
     await tester.pumpAndSettle();
     await tester.tap(find.text(label));
     await tester.pumpAndSettle();
@@ -154,7 +157,7 @@ void main() {
     await pumpRegister(tester);
 
     expect(find.byType(TextField), findsNWidgets(5));
-    expect(find.byType(DropdownButtonFormField), findsNWidgets(3));
+    expect(find.byType(DropdownButtonFormField<Place>), findsNWidgets(3));
     expect(find.text('Create your account'), findsOneWidget);
     expect(find.widgetWithText(FilledButton, 'Create account'), findsOneWidget);
   });
@@ -164,14 +167,14 @@ void main() {
     await pumpRegister(tester);
 
     // No country yet: tapping the county field opens nothing.
-    await tester.tap(find.byType(DropdownButtonFormField).at(1));
+    await tester.tap(find.byType(DropdownButtonFormField<Place>).at(1));
     await tester.pumpAndSettle();
     expect(find.text('Mombasa'), findsNothing);
 
     await selectAt(tester, 0, 'Kenya');
 
     // Now the same field reaches the county list.
-    await tester.tap(find.byType(DropdownButtonFormField).at(1));
+    await tester.tap(find.byType(DropdownButtonFormField<Place>).at(1));
     await tester.pumpAndSettle();
     expect(find.text('Nairobi'), findsOneWidget);
     await tester.tap(find.text('Nairobi'));
