@@ -24,6 +24,18 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   bool _busy = false;
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Prefill from `/login?phone=...` (register hand-off). Controller
+    // writes stay out of build(); the isEmpty guard keeps a user-cleared
+    // field from being re-injected on later dependency changes.
+    final prefill = GoRouterState.of(context).uri.queryParameters['phone'];
+    if (prefill != null && prefill.isNotEmpty && _phone.text.isEmpty) {
+      _phone.text = prefill;
+    }
+  }
+
+  @override
   void dispose() {
     _phone.dispose();
     _password.dispose();
@@ -72,11 +84,6 @@ class _LoginPageState extends ConsumerState<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
-    final prefill = GoRouterState.of(context).uri.queryParameters['phone'];
-    if (_phone.text.isEmpty && prefill != null && prefill.isNotEmpty) {
-      _phone.text = prefill;
-    }
-
     return Scaffold(
       appBar: AppBar(
         title: const Text('RepairAI'),
