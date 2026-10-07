@@ -67,7 +67,16 @@ void main() {
       routes: [
         GoRoute(
           path: '/change-password',
-          builder: (_, _) => const ChangePasswordPage(),
+          // Mirror the real guard's contract: when the session flips to
+          // signed out, this location is no longer the change page. The
+          // page itself relies on the guard, so a standalone pump can
+          // never exercise sign-out navigation without this.
+          builder: (_, _) => Consumer(builder: (_, ref, _) {
+            final session = ref.watch(sessionProvider);
+            return session.signedIn
+                ? const ChangePasswordPage()
+                : const _Stub('login page');
+          }),
         ),
         GoRoute(path: '/home', builder: (_, _) => const _Stub('home page')),
         GoRoute(path: '/login', builder: (_, _) => const _Stub('login page')),
