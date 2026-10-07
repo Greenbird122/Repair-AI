@@ -1,6 +1,6 @@
 # RepairAI — Phase 1: Auth Slice
 
-> **Status: complete.** `flutter analyze` 0 issues · `flutter test` 104
+> **Status: complete.** `flutter analyze` 0 issues · `flutter test` 139
 > passing + 1 live smoke test (skipped locally, run in CI with
 > `LIVE_SMOKE=1`). Five pages exist: splash, home, login, register,
 > change-password — the first real pages on top of the Phase 0 network
@@ -107,21 +107,46 @@ token storage and fake session keep the whole suite offline.
 - One live register probe created a real account (`user_1`, id 104)
   that was kept as-is; noted in `api-coverage.md`.
 
+## Hardening pass (2026-10-07, after external review)
+
+A code review caught four defects the first pass shipped, all fixed and
+pinned by tests:
+
+1. **The encrypted store is now the data-layer default.**
+   `tokenStorageProvider` returned `InMemoryTokenStorage` while only
+   `main.dart`'s scope override supplied `SecureTokenStorage` — the
+   persistence guarantee lived in a UI widget and every provider consumer
+   silently ran on volatile memory. The provider default is now
+   `SecureTokenStorage`; tests override with fakes.
+2. **UI tests hydrate again.** With the real store as default, a bare
+   `RepairAiApp` pump hung forever: `flutter_secure_storage` 11.x's
+   channel never answers under the flutter_test binding, so session
+   hydration stayed `hydrating` and the guard never redirected (12 red
+   tests — CI was right, the earlier "all passing" claim was not
+   re-verified after the last commits). `test/flutter_test_config.dart`
+   now installs the plugin's official in-memory
+   `TestFlutterSecureStoragePlatform` for every run.
+3. **SessionState gained `copyWith`;** password-change success rebuilds
+   via `copyWith(mustChangePassword: false)` instead of hand-rolling a
+   constructor that drops fields.
+4. **Login prefill moved out of `build()`** into
+   `didChangeDependencies` (controller writes during build are a rebuild
+   hazard), and the change-password page restores its button after a
+   sign-out that has not yet redirected instead of freezing disabled.
+
 ## How this was verified
 
 ```
 flutter analyze                        →  No issues found!
-flutter test                           →  +104: All tests passed!
+flutter test                           →  +139 ~1: All tests passed!
 live curl probes (real creds)          →  login/logout/register/
                                           change-password/profile/
                                           check-phone/locations proven
 ```
 
-One real defect was caught the hard way: the first CI run on this phase
-failed `flutter analyze` on a dead optional parameter in
-`login_page_test.dart` — a locally-claimed-clean analyze that was
-actually never re-run to completion. Fixed in `3e6ec1f`; CI is the
-authority on analyze, not local memory.
+CI is the authority: the first run of this phase failed analyze on a
+dead parameter the local claim had missed, and the next run failed test
+on the hydration hang above — both fixed, both lessons recorded here.
 
 ## Not in this phase
 
