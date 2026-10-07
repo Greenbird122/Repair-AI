@@ -17,7 +17,7 @@ health promoter (CHP).
 | Pages built | **5 of 36** — splash, home, login, register, change-password |
 | Network core | **Complete** (Phase 0): JWT auth, silent refresh, timeouts, health check |
 | Auth slice | **Complete** (Phase 1): secure token store, session, guarded routes, sign-up/sign-in/change-password |
-| Tests | **104 passing**, plus 1 live smoke test |
+| Tests | **139 passing**, plus 1 live smoke test |
 | CI | analyze + test + live backend probe on every push |
 | Release signing | **Debug keys only** — `android/app/build.gradle.kts` |
 
@@ -101,7 +101,7 @@ with `_test` appended. Whole-app tests go in `test/app/`.
 
 ```bash
 flutter analyze     # must report 0 issues
-flutter test        # 104 tests, runs offline
+flutter test        # 139 tests, runs offline
 ```
 
 CI runs both, plus a live probe of `GET /api/app-version/`, so a backend
