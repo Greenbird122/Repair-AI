@@ -27,7 +27,12 @@ final class FlutterSecureStore implements SecureStore {
 }
 
 /// Encrypted-at-rest JWT storage (Android EncryptedSharedPreferences).
-/// Fills the [TokenStorage] seam Phase 0 deliberately left in memory.
+/// The app-wide default: `tokenStorageProvider` hands it out
+/// (`network_providers.dart`), so persistence is a data-layer guarantee,
+/// not entry-point wiring. Unit tests fake [SecureStore]; UI tests stub
+/// the plugin channel itself (`test/flutter_secure_channel.dart`) —
+/// 11.x speaks `BasicMessageChannel`, so a missing handler makes reads
+/// hang forever and hydration never completes.
 final class SecureTokenStorage implements TokenStorage {
   SecureTokenStorage({SecureStore? store}) : _store = store ?? FlutterSecureStore();
 
