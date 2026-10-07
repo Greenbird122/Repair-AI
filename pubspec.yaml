@@ -35,6 +35,8 @@ dependencies:
   flutter_native_splash: ^2.4.6
   flutter_riverpod: ^3.4.3
   flutter_secure_storage: ^11.2.0
+  # Import lets the test config install the plugin's in-memory platform.
+  flutter_secure_storage_platform_interface: ^2.1.1
   go_router: ^18.0.2
   http: ^1.6.0
 
