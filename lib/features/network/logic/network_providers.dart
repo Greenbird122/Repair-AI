@@ -3,10 +3,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../data/api_client.dart';
 import '../data/auth_authenticator.dart';
 import '../data/token_storage.dart';
+import '../../auth/data/secure_token_storage.dart';
 
-/// Shared token store. In-memory until the auth slice adds persistence.
+/// Shared token store: the encrypted-at-rest [SecureTokenStorage], so
+/// persistence is a data-layer guarantee, not entry-point wiring (the
+/// epl_app lesson — do not leave the real store reachable only through
+/// an override). Tests supply memory stores by overriding this provider.
 final tokenStorageProvider = Provider<TokenStorage>(
-  (ref) => InMemoryTokenStorage(),
+  (ref) => SecureTokenStorage(),
 );
 
 /// Refresh policy backed by [tokenStorageProvider].
