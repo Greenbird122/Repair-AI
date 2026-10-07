@@ -40,6 +40,19 @@ class SessionState {
   final AuthProfile? profile;
 
   bool get signedIn => status == SessionStatus.signedIn;
+
+  /// Transitions rebuild from the current state so no flag is dropped by
+  /// hand. ([profile] can be carried forward but not nulled here.)
+  SessionState copyWith({
+    SessionStatus? status,
+    bool? mustChangePassword,
+    AuthProfile? profile,
+  }) =>
+      SessionState(
+        status: status ?? this.status,
+        mustChangePassword: mustChangePassword ?? this.mustChangePassword,
+        profile: profile ?? this.profile,
+      );
 }
 
 /// Owns the auth lifecycle: hydrate from storage on startup, login,
@@ -167,9 +180,9 @@ class SessionController extends Notifier<SessionState> {
     );
     if (result case Data()) {
       if (ref.mounted && state.signedIn) {
-        state = SessionState(
+        state = state.copyWith(
           status: SessionStatus.signedIn,
-          profile: state.profile,
+          mustChangePassword: false,
         );
       }
       return const Data(null);
