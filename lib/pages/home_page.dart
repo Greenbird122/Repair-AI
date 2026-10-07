@@ -1,13 +1,23 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../core/theme.dart';
+import '../features/auth/logic/session_controller.dart';
 
-/// Placeholder landing page after the splash — the app itself starts here.
-class HomePage extends StatelessWidget {
+/// Signed-in landing after '/'. Phase 1 shows who you are and how to
+/// leave; the pregnancy dashboard is Phase 2. Navigation on sign-out is
+/// the guard's job, not this page's.
+class HomePage extends ConsumerWidget {
   const HomePage({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final session = ref.watch(sessionProvider);
+    final name = session.profile?.fullName;
+    final greeting = (name == null || name.isEmpty)
+        ? 'You are signed in'
+        : 'Signed in as $name';
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('RepairAI'),
@@ -41,16 +51,13 @@ class HomePage extends StatelessWidget {
               'Heal · Support · Hope',
               style: RepairText.tagline(14),
             ),
-            const SizedBox(height: 48),
-            FilledButton(
-              onPressed: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Next stop: onboarding ✨'),
-                  ),
-                );
-              },
-              child: const Text('Get Started'),
+            const SizedBox(height: 32),
+            Text(greeting, style: RepairText.tagline(15)),
+            const SizedBox(height: 24),
+            OutlinedButton(
+              onPressed: () =>
+                  ref.read(sessionProvider.notifier).logout(),
+              child: const Text('Sign out'),
             ),
           ],
         ),

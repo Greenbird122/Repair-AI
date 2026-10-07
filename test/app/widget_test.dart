@@ -1,13 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:http/http.dart' as http;
+import 'package:http/testing.dart';
 
 import 'package:repairai/core/theme.dart';
+import 'package:repairai/features/network/data/api_client.dart';
+import 'package:repairai/features/network/data/token_storage.dart';
 import 'package:repairai/main.dart';
+import 'package:repairai/pages/login_page.dart';
 import 'package:repairai/pages/splash_gate.dart';
 import 'package:repairai/pages/splash_page.dart';
 
+const _profileJson = '{"id":103,"username":"254700000000",'
+    '"name":"Test User","email":"","phone":"+254700000000",'
+    '"role":"patient","country":"KE","facility_name":null,'
+    '"must_change_password":false,"is_verified":true,'
+    '"profile_picture_url":null}';
+
 void main() {
-  testWidgets('splash plays, then lands on home', (tester) async {
+  testWidgets('splash plays, then the guard lands a signed-out app on login',
+      (tester) async {
     await tester.pumpWidget(const RepairAiApp());
     await tester.pump(const Duration(seconds: 2));
 
@@ -16,10 +28,11 @@ void main() {
     expect(find.text('RepairAI'), findsOneWidget);
     expect(find.textContaining('Heal'), findsOneWidget);
 
-    // Past the 5s timeline: home page has replaced the splash.
+    // Past the 5s timeline: the hand-off meets the guard and stops at
+    // login — no stored session, no home.
     await tester.pump(const Duration(seconds: 4));
-    expect(find.text('Get Started'), findsOneWidget);
-    expect(find.textContaining('Heal'), findsOneWidget);
+    expect(find.byType(LoginPage), findsOneWidget);
+    expect(find.text('Welcome back'), findsOneWidget);
   });
 
   testWidgets('splash renders the dark logo stage', (tester) async {
@@ -60,11 +73,34 @@ void main() {
     expect(root.style!.color, RepairColors.onDark);
     expect(ai.style!.color, RepairColors.amber);
 
-    // Home stays in the light world after the splash hands over
-    // (0.6s + 5s crosses the 5.4s auto-advance Timer).
+    // The light world resumes after the splash hands over: login page
+    // rides the light theme (0.6s + 5s crosses the 5.4s auto-advance).
     await tester.pump(const Duration(seconds: 5));
-    final BuildContext homeCtx = tester.element(find.text('Get Started'));
-    expect(Theme.of(homeCtx).scaffoldBackgroundColor, RepairColors.bgCenter);
+    final BuildContext loginCtx = tester.element(find.byType(LoginPage));
+    expect(Theme.of(loginCtx).scaffoldBackgroundColor, RepairColors.bgCenter);
+  });
+
+  testWidgets('a stored session sails past login and lands on home',
+      (tester) async {
+    final storage = InMemoryTokenStorage();
+    await storage.save(accessToken: 'a', refreshToken: 'r');
+    await tester.pumpWidget(
+      RepairAiApp(
+        tokenStorage: storage,
+        apiClient: ApiClient(
+          baseUrl: 'https://test',
+          httpClient: MockClient(
+            (_) async => http.Response(_profileJson, 200),
+          ),
+        ),
+      ),
+    );
+    await tester.pump(const Duration(seconds: 6));
+    await tester.pump();
+
+    expect(find.byType(LoginPage), findsNothing);
+    expect(find.text('Signed in as Test User'), findsOneWidget);
+    expect(find.text('Sign out'), findsOneWidget);
   });
 
   testWidgets('emblem is precached, not decode-blocked on first paint',
