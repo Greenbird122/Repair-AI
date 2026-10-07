@@ -14,9 +14,10 @@ health promoter (CHP).
 
 | | |
 |---|---|
-| Pages built | **2 of 36** — an animated splash and a placeholder home |
+| Pages built | **5 of 36** — splash, home, login, register, change-password |
 | Network core | **Complete** (Phase 0): JWT auth, silent refresh, timeouts, health check |
-| Tests | **56 passing**, plus 1 live smoke test |
+| Auth slice | **Complete** (Phase 1): secure token store, session, guarded routes, sign-up/sign-in/change-password |
+| Tests | **104 passing**, plus 1 live smoke test |
 | CI | analyze + test + live backend probe on every push |
 | Release signing | **Debug keys only** — `android/app/build.gradle.kts` |
 
@@ -65,11 +66,17 @@ anywhere else.
 
 ```
 lib/
-  main.dart                 entry point; mounts ProviderScope
+  main.dart                 entry point; ProviderScope lives inside the app widget
   core/
-    routes.dart             every page registers here (GoRouter)
+    routes.dart             every page registers here (GoRouter + auth guard)
     theme.dart              all colors and text styles
   features/
+    auth/
+      data/                 AuthApi (live-proven shapes), secure token storage
+      logic/                SessionController — the auth lifecycle
+    locations/
+      data/                 country/county/sub-county lookups (name filters)
+      logic/                Riverpod providers for the geo cascade
     network/
       data/                 ApiClient, JWT refresh, Result, models
       logic/                Riverpod providers
@@ -77,9 +84,10 @@ lib/
   widgets/                  shared widgets (EcgPulse)
 
 test/
-  app/                      whole-app tests (root wiring, splash flow)
+  app/                      whole-app tests (root wiring, provider scope)
   core/                     mirrors lib/core/
-  features/network/         mirrors lib/features/network/
+  features/                 mirrors lib/features/ (auth, locations, network)
+  pages/                    mirrors lib/pages/
   smoke/                    live probe of production (CI only)
 ```
 
@@ -93,7 +101,7 @@ with `_test` appended. Whole-app tests go in `test/app/`.
 
 ```bash
 flutter analyze     # must report 0 issues
-flutter test        # 56 tests, runs offline
+flutter test        # 104 tests, runs offline
 ```
 
 CI runs both, plus a live probe of `GET /api/app-version/`, so a backend
@@ -126,6 +134,7 @@ config is required before any Play Store submission.
 | [`docs/api-coverage.md`](docs/api-coverage.md) | Which endpoints we use, and the phase order |
 | [`docs/page-list.md`](docs/page-list.md) | The 36-page plan and the core loop |
 | [`docs/phase-0.md`](docs/phase-0.md) | What the network layer does, file by file |
+| [`docs/phase-1.md`](docs/phase-1.md) | What the auth slice does, file by file |
 | [`docs/corpus.md`](docs/corpus.md) | What has actually been built |
 
 Read `AGENT_SPEC.md` first. If it is not in `corpus.md`, it does not exist.

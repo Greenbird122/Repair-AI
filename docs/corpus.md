@@ -5,11 +5,15 @@
 
 ## Status snapshot (2026-10-07)
 
-- Pages built: **2 of 36** (splash + placeholder home) — plan in
-  `docs/page-list.md`
+- Pages built: **5 of 36** (splash, home, login, register,
+  change-password) — plan in `docs/page-list.md`
 - Phase 0 network core: **complete** — 9 source files, file-by-file map
   in `docs/phase-0.md`
-- Tests: **56 passing** across 14 files (47 network, 8 app, 1 live smoke)
+- Phase 1 auth slice: **complete** — secure token store, auth + location
+  APIs, session controller, guarded routes, 4 pages; map in
+  `docs/phase-1.md`
+- Tests: **104 passing** across 23 files (mirroring lib paths)
+- CI: green on every push since the analyze fix (`3e6ec1f`)
 - CI: green on every push so far
 - APK: debug builds verified on emulator (avd `repair_phone`)
 
@@ -45,6 +49,15 @@
     JWT refresh, `ApiClient` (5s timeout, 401 retry), app-version health
     probe, Riverpod wiring. Deps added: `http`, `flutter_riverpod`.
     Per-file purposes and decisions in `docs/phase-0.md`.
+11. **Phase 1 auth slice** (2026-10-07) — secure JWT storage
+    (EncryptedSharedPreferences), `AuthApi` (check-phone, register,
+    login, logout, change-password, profile), location lookup +
+    providers (names, not ids), `SessionController` with hydration,
+    pure-function route guard + `routerProvider`, and four pages:
+    login (phone pre-fill from register), register (geo cascade),
+    change-password (forced-change parking), home (greeting + sign
+    out). All request shapes proven live with real credentials.
+    Per-file map, decisions, and gaps in `docs/phase-1.md`.
 
 ## Lessons learned (from the failed epl_app predecessor)
 
@@ -73,15 +86,19 @@ error reporting must be reviewed, not just installed.
    hybrid), sync strategy, offline UX. Biggest risk; gates pages 5–15.
 2. **State management** — **decided: Riverpod** (2026-10-06). Providers
    live in `features/<feature>/logic/`; pages stay dumb.
-3. **Accounts/auth** — whether and how (shapes onboarding).
+3. **Accounts/auth** — **decided and built (Phase 1, 2026-10-07):** JWT
+   pair from `POST /api/auth/login/`, secure on-device storage, phone
+   sign-in, self-registration, forced-password parking. See
+   `docs/phase-1.md`.
 4. **The "AI" in RepairAI** — on-device vs cloud, provider, offline
    behavior, cost per user.
 5. **The 30–40 page list** — **written: `docs/page-list.md`**
    (2026-10-06). 36-page inventory cut to a 14-page core loop, phased
    against `api-coverage.md`, plus the offline requirements it derives
    for decision 1. New pages must state which loop sentence they serve.
-6. **TLS cert pinning** — deliberately deferred to **Phase 1**, when real
-   credentials start crossing the wire. `package:http` has no built-in
-   pinning, so it needs a custom client over a pinned `SecurityContext`.
-   Logged as a choice, not an oversight: `epl_app` shipped with pinning
-   disabled and its 90-day cert boundary lined up with its death window.
+6. **TLS cert pinning** — deferred to Phase 1 and **still open** —
+   Phase 1 shipped real JWTs crossing the wire without pinning. Needs a
+   custom client over a pinned `SecurityContext` (`package:http` has no
+   built-in pinning). Logged as a choice, not an oversight: `epl_app`
+   shipped with pinning disabled and its 90-day cert boundary lined up
+   with its death window. **Top item for the next phase.**

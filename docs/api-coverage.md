@@ -32,6 +32,22 @@
 | `POST /api/auth/refresh/` `{"refresh":""}` | **400** `{"refresh":["This field may not be blank."]}` | |
 | `GET /api/patients/my-profile/` | **401** `{"detail":"Authentication credentials were not provided."}` | JWT wall confirmed |
 
+### Contracts proven live on 2026-10-07 (real credentials, authenticated)
+
+Probed with curl while building Phase 1. Status codes and JSON keys
+only — no token values. These are the shapes `AuthApi` and
+`LocationApi` decode; a drift breaks their tests.
+
+| Endpoint | Result | Contract facts |
+|---|---|---|
+| `POST /api/auth/login/` | **200** | `{access, refresh, id, user_id, username, …, must_change_password: false, role: "patient"}` — token pair + profile detail in one body |
+| `POST /api/auth/change-password/` | **200** | fields are `old_password` / `new_password` / `new_password_confirm`; 200 body never observed (would rotate the test password) |
+| `POST /api/auth/logout/` | **200** | `{"detail":"Logout successful. …"}` |
+| `POST /api/auth/register/` | **201** | exactly 5 required fields: `country, county, sub_county, password, password_confirm` — **names, never ids**; body `{detail, user_id, username, role}`; returns no tokens (register does not sign in). Caveat: one probe created real account `user_1` (id 104), kept. |
+| `POST /api/auth/check-phone/` | **200** / **400** | `200 {"detail":"…available."}` / `400 {"detail":"…already exists."}` |
+| `GET/PATCH /api/auth/profile/` | **200** | GET returns the 36-key account record; PATCH accepts `{}` → 200 |
+| `GET /api/patients/locations/counties/?country=Kenya` | **200** | filters match **names**: `?country=Kenya` works; `?country=KE` and `?county=13` return `[]` |
+
 ### Unauthenticated enumeration technique (how §3 was proven)
 
 Probing works without credentials because Django resolves URLs *before*
@@ -354,8 +370,11 @@ miscount of 9, which also made the previous total wrong.)
 1. **Phase 0 — Network core + health.** Client, JWT store, refresh
    interceptor, `Result` type (data/error/offline), bounded
    timeouts, `/api/app-version/` health check + CI smoke test.
+   **Done 2026-10-06.**
 2. **Phase 1 — Auth slice (§1).** check-phone → register → login →
-   refresh → profile. Fully tested end-to-end.
+   refresh → profile. Fully tested end-to-end. **Done 2026-10-07**
+   (`docs/phase-1.md`), with the §2 geo cascade pulled forward from
+   Phase 2 because register cannot exist without it.
 3. **Phase 2 — Geo + profile (§2 locations, my-profile).** Cascading
    location selects feed register/profile.
 4. **Phase 3 — Core patient loop (§2 visits + §3 triage + §6
@@ -380,3 +399,8 @@ Non-blocking follow-ups:
    rendering any risk level (shape proven, schema not seen).
 2. Spike the native WebRTC plugin before writing calling UI (§13).
 3. Reopen decision 3 (payments) before Phase 6 planning.
+4. **TLS cert pinning** — slipped past Phase 1; real credentials now
+   cross the wire unpinned. See `corpus.md` open decision 6.
+5. Verify the forced-change endpoint (`/api/auth/set-new-password/`)
+   — the test account had `must_change_password: false`, so the flag's
+   true server-side flow has never been exercised.

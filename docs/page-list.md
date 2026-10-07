@@ -1,8 +1,9 @@
 # RepairAI — The Page List
 
-> **Status: written 2026-10-06.** Answers open decision 5 in `corpus.md`.
-> This is the target, not a progress report — pages 1–2 are the only ones
-> that exist (`corpus.md`: 2 of 36 built).
+> **Status: written 2026-10-06; built through Phase 1 on 2026-10-07.**
+> Answers open decision 5 in `corpus.md`. Five of 36 pages now exist:
+> splash, home, login, register, change-password (`corpus.md`: 5 of 36
+> built).
 
 ## The core loop
 
@@ -23,12 +24,12 @@ Anything that does not serve one of those four is staged, not core.
 | # | Page | Route | Endpoint |
 |---|---|---|---|
 | 1 | Splash | `/` | — (built) |
-| 2 | Home | `/home` | — (built, placeholder) |
+| 2 | Home | `/home` | — (built, sign-out landing) |
 | 3 | Welcome | `/welcome` | — |
-| 4 | Check phone | `/check-phone` | `POST /api/auth/check-phone/` |
-| 5 | Register | `/register` | `POST /api/auth/register/` |
-| 6 | Login | `/login` | `POST /api/auth/login/` |
-| 7 | Set new password | `/set-password` | `POST /api/auth/set-new-password/` |
+| 4 | Check phone | `/check-phone` | `POST /api/auth/check-phone/` — runs inside register instead (`docs/phase-1.md`) |
+| 5 | Register | `/register` | `POST /api/auth/register/` (built) |
+| 6 | Login | `/login` | `POST /api/auth/login/` (built) |
+| 7 | Set new password | `/set-password` | `POST /api/auth/set-new-password/` — unverified endpoint; change-password (built) parks the forced flag today |
 | 8 | My health profile | `/profile/health` | `GET/PATCH /api/patients/my-profile/` |
 | 9 | Dashboard | `/dashboard` | `GET /api/patients/dashboard-stats/` |
 | 10 | Visits | `/visits` | `GET /api/patients/visits/` |
@@ -54,9 +55,9 @@ Grouped by area, phased per `api-coverage.md`. **C** = core loop.
 | 5 | Register | `/register` | C | `POST /api/auth/register/` |
 | 6 | Login | `/login` | C | `POST /api/auth/login/` |
 | 7 | Set new password | `/set-password` | C | `POST /api/auth/set-new-password/` |
-| 8 | Change password | `/change-password` | — | `POST /api/auth/change-password/` |
+| 8 | Change password | `/change-password` | — | `POST /api/auth/change-password/` (built) |
 | 9 | Account profile | `/account` | — | `GET/PATCH /api/auth/profile/` |
-| 10 | Log out confirm | `/logout` | — | `POST /api/auth/logout/` |
+| 10 | Log out confirm | `/logout` | — | `POST /api/auth/logout/` — sign-out is inline on home today |
 
 ### B. Status & identity — Phase 2
 | # | Page | Route | Core | Endpoint |
