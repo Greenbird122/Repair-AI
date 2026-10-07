@@ -18,11 +18,10 @@ class _Stub extends StatelessWidget {
 }
 
 class _FakeSession extends SessionController {
-  _FakeSession({
-    this.initial = const SessionState(status: SessionStatus.signedOut),
-  });
+  _FakeSession();
 
-  final SessionState initial;
+  final SessionState initial =
+      const SessionState(status: SessionStatus.signedOut);
   Result<void>? loginResult;
   String? lastPhone;
   String? lastPassword;
