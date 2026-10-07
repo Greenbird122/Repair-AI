@@ -14,7 +14,6 @@
   `docs/phase-1.md`
 - Tests: **139 passing** across 24 files (mirroring lib paths)
 - CI: green on every push since the analyze fix (`3e6ec1f`)
-- CI: green on every push so far
 - APK: debug builds verified on emulator (avd `repair_phone`)
 
 ## Built so far, in order
