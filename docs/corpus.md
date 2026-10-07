@@ -12,7 +12,7 @@
 - Phase 1 auth slice: **complete** — secure token store, auth + location
   APIs, session controller, guarded routes, 4 pages; map in
   `docs/phase-1.md`
-- Tests: **104 passing** across 23 files (mirroring lib paths)
+- Tests: **139 passing** across 24 files (mirroring lib paths)
 - CI: green on every push since the analyze fix (`3e6ec1f`)
 - CI: green on every push so far
 - APK: debug builds verified on emulator (avd `repair_phone`)
@@ -58,6 +58,15 @@
     change-password (forced-change parking), home (greeting + sign
     out). All request shapes proven live with real credentials.
     Per-file map, decisions, and gaps in `docs/phase-1.md`.
+12. **Phase 1 hardening pass** (2026-10-07) — external review caught the
+    token-store default still in-memory (persistence only wired in
+    `main.dart`); the provider now defaults to `SecureTokenStorage`.
+    The switch exposed a UI-test hang (secure-storage channel never
+    answers under flutter_test → hydration stuck → guard silent), fixed
+    by installing the plugin's official in-memory test platform in
+    `test/flutter_test_config.dart`. Also: `SessionState.copyWith`,
+    login prefill out of `build()`, change-page busy-flag restore.
+    Suite: 139 passing.
 
 ## Lessons learned (from the failed epl_app predecessor)
 
