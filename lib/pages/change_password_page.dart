@@ -84,7 +84,11 @@ class _ChangePasswordPageState extends ConsumerState<ChangePasswordPage> {
     if (_busy) return;
     setState(() => _busy = true);
     await ref.read(sessionProvider.notifier).logout();
-    // The guard reroutes to '/login' the moment the state clears.
+    if (!mounted) return;
+    // The guard reroutes to '/login' as the state clears; if the
+    // redirect has not landed yet, restore the button rather than
+    // freezing a still-mounted page behind a permanently disabled one.
+    setState(() => _busy = false);
   }
 
   @override
