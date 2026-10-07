@@ -12,21 +12,17 @@ void main() {
   runApp(const RepairAiApp());
 }
 
-/// The production token store: encrypted at rest (Android
-/// EncryptedSharedPreferences). A single stable instance so rebuilds
-/// never recompute the provider chain.
-final TokenStorage _productionStorage = SecureTokenStorage();
-
 /// App root. [ProviderScope] lives *inside* it, so any bare pump of this
 /// widget — production or test — reaches the providers, and nothing can
-/// silently lose the scope by forgetting to wrap. The router comes from
-/// [routerProvider], which re-runs auth redirects on session changes.
+/// silently lose the scope by forgetting to wrap. The token store is
+/// encrypted at rest by the provider default (see `network_providers.dart`);
+/// the seams below exist for tests.
 class RepairAiApp extends StatelessWidget {
   const RepairAiApp({super.key, this.tokenStorage, this.apiClient});
 
-  /// Test seams; `null` each means production wiring (encrypted store,
-  /// shared client). Riverpod 3 keeps the override type unnameable, so
-  /// the seams travel as the values they wrap.
+  /// Test seams; `null` each means production wiring. Riverpod 3 keeps
+  /// the override type unnameable, so the seams travel as the values
+  /// they wrap.
   final TokenStorage? tokenStorage;
   final ApiClient? apiClient;
 
@@ -34,7 +30,8 @@ class RepairAiApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return ProviderScope(
       overrides: [
-        tokenStorageProvider.overrideWithValue(tokenStorage ?? _productionStorage),
+        tokenStorageProvider
+            .overrideWithValue(tokenStorage ?? SecureTokenStorage()),
         if (apiClient != null) apiClientProvider.overrideWithValue(apiClient!),
       ],
       child: Consumer(
