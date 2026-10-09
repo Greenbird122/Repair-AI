@@ -62,7 +62,7 @@ Every request/response shape was proven live against production on
 
 ## Tests
 
-23 files, 104 tests, mirroring `lib/` per `architecture.md` §Testing:
+23 files, 139 tests, mirroring `lib/` per `architecture.md` §Testing:
 `test/pages/` (four page suites: validation, offline, failure messages,
 navigation), `test/features/auth/` (API shapes vs the live-proven
 contracts; session lifecycle transitions), `test/features/locations/`

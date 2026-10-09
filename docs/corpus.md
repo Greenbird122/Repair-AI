@@ -12,7 +12,7 @@
 - Phase 1 auth slice: **complete** — secure token store, auth + location
   APIs, session controller, guarded routes, 4 pages; map in
   `docs/phase-1.md`
-- Tests: **139 passing** across 24 files (mirroring lib paths)
+- Tests: **139 passing** across 23 files (mirroring lib paths)
 - CI: green on every push since the analyze fix (`3e6ec1f`)
 - APK: debug builds verified on emulator (avd `repair_phone`)
 

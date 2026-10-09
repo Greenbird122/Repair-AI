@@ -72,6 +72,8 @@ this table is the written reason §1.5 asks for.
 3. **Tokens live in memory only.** Secure on-device persistence is deferred
    to the auth slice, deliberately: writing a JWT to disk before a login flow
    exists would be a pointless security hole. `TokenStorage` is the seam.
+   *(Superseded in Phase 1: `tokenStorageProvider` now defaults to
+   `SecureTokenStorage`; see `phase-1.md` §Hardening pass.)*
 4. **Token clearing rule** — clear both tokens **only when the server
    definitively rejects the refresh (4xx)**. Every other failure keeps
    them: timeout, socket error, or a garbled/unexpected 200 payload
